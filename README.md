@@ -112,8 +112,13 @@ lib/
   rate-limit.ts            Limite por IP
   env.ts                   Leitura das variáveis de ambiente
   format.ts                Helpers de apresentação
-supabase/schema.sql        Tabelas, RPC, RLS e dados de exemplo
+supabase/
+  schema.sql               Tabelas, RPC, RLS e dados de exemplo
+  migrations/              Alterações incrementais, para bancos já existentes
 ```
+
+Quem está começando do zero roda só o `schema.sql` — ele já inclui tudo que as
+migrações aplicam. As migrações existem para bancos que já estão em produção.
 
 ## Segurança
 

@@ -36,7 +36,7 @@ comment on column public.baterias.polaridade is
 comment on column public.baterias.tecnologia is
   'Carro com start-stop exige EFB ou AGM; chumbo-ácido comum degrada em meses.';
 comment on column public.baterias.observacoes is
-  'ATENCAO: a RPC buscar_bateria NAO devolve esta coluna. Ver a nota na secao 2.';
+  'Aviso especifico da bateria. A RPC junta com as observacoes das outras duas tabelas.';
 
 create table if not exists public.veiculos (
   cod          text primary key,          -- ex.: 'vw01'
@@ -54,7 +54,7 @@ create table if not exists public.veiculos (
 );
 
 comment on column public.veiculos.observacoes is
-  'Mesma ressalva de baterias.observacoes: não é devolvida pela RPC.';
+  'Aviso especifico do veiculo. A RPC junta com as observacoes das outras duas tabelas.';
 
 create table if not exists public.compatibilidade (
   -- PK só em `cod`: cada veículo tem exatamente UMA bateria indicada.
@@ -81,10 +81,10 @@ create index if not exists compatibilidade_sku_idx
 -- As 20 colunas do RETURNS TABLE são o contrato com `Row` em lib/types.ts:
 -- mexer aqui exige mexer lá.
 --
--- NOTA sobre observações: a RPC devolve `compatibilidade.observacao`, e é essa
--- que o assistente repassa ao cliente (regra 6 do system prompt). As colunas
--- `baterias.observacoes` e `veiculos.observacoes` NÃO são devolvidas — o que
--- estiver escrito nelas nunca chega ao cliente.
+-- NOTA sobre observações: as três tabelas guardam observações, em colunas de
+-- nome parecido (`observacao` na compatibilidade, `observacoes` nas outras
+-- duas). A RPC reúne as três num único campo `observacao`, que é o que o
+-- assistente repassa ao cliente (regra 6 do system prompt).
 --
 -- NOTA sobre p_marca: não há guarda de null. Chamar com `p_marca => null`
 -- devolve zero linhas, porque `ilike null` é null. Na prática isso não ocorre:
@@ -131,7 +131,9 @@ as $$
     v.ano_inicio, v.ano_fim, v.motorizacao, v.combustivel, v.start_stop,
     b.sku, b.fabricante, b.capacidade_ah, b.cca, b.polaridade, b.tecnologia,
     b.peso_kg, b.comprimento_mm, b.largura_mm, b.altura_mm,
-    c.observacao
+    -- concat_ws ignora os nulls; nullif devolve null quando as três estão
+    -- vazias, para o assistente não receber string em branco.
+    nullif(concat_ws(' ', c.observacao, b.observacoes, v.observacoes), '') as observacao
   from public.veiculos v
   join public.compatibilidade c on c.cod = v.cod
   join public.baterias b        on b.sku = c.sku
