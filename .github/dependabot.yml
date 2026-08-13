@@ -1,0 +1,16 @@
+# Atualizações de dependências. Num repositório público as versões instaladas
+# ficam visíveis no package-lock.json, então uma vulnerabilidade conhecida é
+# pública junto — vale manter o lock em dia.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Um PR por grupo em vez de um por pacote.
+      producao:
+        dependency-type: production
+      desenvolvimento:
+        dependency-type: development
