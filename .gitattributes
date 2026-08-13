@@ -1,0 +1,12 @@
+# Normaliza a quebra de linha no repositório (LF), independentemente do SO de
+# quem clona. Sem isto, um checkout no Windows gera diffs de arquivo inteiro.
+* text=auto eol=lf
+
+# Binários: nunca converter.
+*.ico binary
+*.png binary
+*.jpg binary
+*.woff2 binary
+
+# Não conta como código nas estatísticas de linguagem do GitHub.
+package-lock.json linguist-generated=true
